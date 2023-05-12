@@ -1,0 +1,9 @@
+apiVersion: v2
+name: aspnet
+description: Helm chart for ASP.NET applications
+
+type: application
+
+version: 1.1.2
+
+appVersion: "1.2.5"
