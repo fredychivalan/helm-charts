@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ template "laravel.fullname" . }}-fpm-conf
+  labels:
+    {{- include "laravel.labels" . | nindent 4 }}
+data:
+  www.conf: |
+    {{- tpl .Values.php.fpmConf . | nindent 4 }}
