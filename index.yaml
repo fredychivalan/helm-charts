@@ -11,4 +11,16 @@ entries:
     urls:
     - https://github.com/fredychivalan/helm-charts/releases/download/aspnet-1.1.2/aspnet-1.1.2.tgz
     version: 1.1.2
-generated: "2023-05-12T21:30:42.758925668Z"
+  laravel:
+  - apiVersion: v2
+    appVersion: 1.5.12
+    created: "2023-05-12T22:08:38.652943386Z"
+    description: Helm chart for Laravel applications
+    digest: 507179ae3f80a05961f244d79ae61319d66ef5477b6297c45320eb799bda2ae6
+    icon: https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg
+    name: laravel
+    type: application
+    urls:
+    - https://github.com/fredychivalan/helm-charts/releases/download/laravel-1.2.5/laravel-1.2.5.tgz
+    version: 1.2.5
+generated: "2023-05-12T22:08:38.652959787Z"
