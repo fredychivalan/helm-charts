@@ -58,6 +58,15 @@ laravel:
   livenessProbe: {}
   readinessProbe: {}
 
+
+schedule:
+  enabled: false
+  # command:
+  #   - php
+  # args:
+  #   - artisan
+  #   - schedule:work 
+
 nginx:
   image:
     repository: nginx

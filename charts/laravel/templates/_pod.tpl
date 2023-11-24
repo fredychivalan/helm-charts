@@ -95,6 +95,61 @@ containers:
       - name: php-fpm-conf
         mountPath: /usr/local/etc/php-fpm.d/www.conf
         subPath: www.conf
+{{- if .Values.schedule.enabled }}
+  - name: schedule
+  {{- with .Values.securityContext }}
+    securityContext:
+      {{- toYaml . | nindent 6 }}
+  {{- end }}
+    image: "{{ .Values.laravel.image.repository }}:{{ .Values.laravel.image.tag | default .Chart.AppVersion }}"
+    imagePullPolicy: {{ .Values.laravel.image.pullPolicy }}
+  {{- if or .Values.laravel.extraEnv .Values.laravel.envWithTpl }}
+    env:
+    {{- with .Values.laravel.extraEnv }}
+      {{- toYaml . | nindent 6 }}
+    {{- end }}
+    {{- range $item := .Values.laravel.envWithTpl }}
+      - name: {{ $item.name }}
+        value: {{ tpl $item.value $ | quote }}
+    {{- end }}
+  {{- end }}
+    envFrom:
+      - configMapRef:
+          name: {{ template "laravel.fullname" . }}-env
+    {{- with .Values.laravel.extraEnvFrom  }}
+      {{- toYaml . | nindent 6 }}
+    {{- end  }}
+  {{- if .Values.schedule.args }}
+    args:
+    {{- toYaml .Values.schedule.args | nindent 6 }}
+  {{- end}}
+  {{- if .Values.schedule.command }}
+    command:
+    {{- toYaml .Values.schedule.command | nindent 6 }}
+  {{- end }}
+  {{- with .Values.laravel.lifecycle }}
+    lifecycle:
+      {{- toYaml . | nindent 6 }}
+  {{- end }}
+  {{- with .Values.laravel.livenessProbe }}
+    livenessProbe:
+      {{- toYaml . | nindent 6 }}
+  {{- end }}
+  {{- with .Values.laravel.readinessProbe }}
+    readinessProbe:
+      {{- toYaml . | nindent 6 }}
+  {{- end }}
+  {{- with .Values.resources }}
+    resources:
+      {{- toYaml . | nindent 6 }}
+  {{- end }}
+    volumeMounts:
+      - name: shared-files
+        mountPath: /usr/share/nginx/html
+      - name: php-fpm-conf
+        mountPath: /usr/local/etc/php-fpm.d/www.conf
+        subPath: www.conf
+{{- end }}
 volumes:
   - name: nginx-config
     configMap:
