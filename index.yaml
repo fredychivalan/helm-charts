@@ -13,6 +13,17 @@ entries:
     version: 1.1.2
   laravel:
   - apiVersion: v2
+    appVersion: "1.6"
+    created: "2023-11-30T21:21:43.251868378Z"
+    description: Helm chart for Laravel applications
+    digest: d6c330bab9a13b72314da8bf1007d4cdea3f439a48ce50250a35600b575ba17f
+    icon: https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg
+    name: laravel
+    type: application
+    urls:
+    - https://github.com/fredychivalan/helm-charts/releases/download/laravel-1.2.8/laravel-1.2.8.tgz
+    version: 1.2.8
+  - apiVersion: v2
     appVersion: 1.5.12
     created: "2023-11-24T04:38:36.418865906Z"
     description: Helm chart for Laravel applications
@@ -34,4 +45,4 @@ entries:
     urls:
     - https://github.com/fredychivalan/helm-charts/releases/download/laravel-1.2.5/laravel-1.2.5.tgz
     version: 1.2.5
-generated: "2023-11-24T04:38:36.418878289Z"
+generated: "2023-11-30T21:21:43.251882945Z"
