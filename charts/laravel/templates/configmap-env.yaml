@@ -5,6 +5,6 @@ metadata:
   labels:
     {{- include "laravel.labels" . | nindent 4 }}
 data:
-  {{- range $key, $val := .Values.laravel.env }}
+  {{- range $key, $val := .Values.laravel.envVariables }}
   {{ $key }}: "{{ $val | toString }}"
   {{- end}}

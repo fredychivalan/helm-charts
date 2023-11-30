@@ -4,15 +4,23 @@ serviceAccountName: {{ include "laravel.serviceAccountName" . }}
 imagePullSecrets:
   {{- toYaml . | nindent 2 }}
 {{- end }}
+{{- if .Values.priorityClassName }}
+priorityClassName: {{ .Values.priorityClassName }}
+{{- end }}
 {{- with .Values.podSecurityContext }}
 securityContext:
   {{- toYaml . | nindent 2 }}
 {{- end }}
 {{- with .Values.initContainers }}
 initContainers:
-  {{- toYaml . | nindent 2 }}
+{{- if kindIs "string" . }}
+  {{- tpl . $ | nindent 2 }}
+{{- else }}
+  {{-  toYaml . | nindent 2 }}
+{{- end -}}
 {{- end }}
 containers:
+{{- if .Values.nginx.enabled }}
   - name: nginx
   {{- with .Values.securityContext }}
     securityContext:
@@ -42,16 +50,17 @@ containers:
         subPath: nginx.conf
       - name: shared-files
         mountPath: /usr/share/nginx/html
+{{- end }}
   - name: {{ .Chart.Name }}
   {{- with .Values.securityContext }}
     securityContext:
       {{- toYaml . | nindent 6 }}
   {{- end }}
-    image: "{{ .Values.laravel.image.repository }}:{{ .Values.laravel.image.tag | default .Chart.AppVersion }}"
+    image: "{{ .Values.laravel.image.repository }}:{{ .Values.laravel.image.tag }}"
     imagePullPolicy: {{ .Values.laravel.image.pullPolicy }}
-  {{- if or .Values.laravel.extraEnv .Values.laravel.envWithTpl }}
+  {{- if or .Values.laravel.env .Values.laravel.envWithTpl }}
     env:
-    {{- with .Values.laravel.extraEnv }}
+    {{- with .Values.laravel.env }}
       {{- toYaml . | nindent 6 }}
     {{- end }}
     {{- range $item := .Values.laravel.envWithTpl }}
@@ -61,7 +70,11 @@ containers:
   {{- end }}
     envFrom:
       - configMapRef:
-          name: {{ template "laravel.fullname" . }}-env
+        {{ if .Values.laravel.existingConfigMap }}
+          name:  {{ .Values.laravel.existingConfigMap }}
+        {{ else }}
+          name:  {{ template "laravel.fullname" . }}-env
+        {{ end }}
     {{- with .Values.laravel.extraEnvFrom  }}
       {{- toYaml . | nindent 6 }}
     {{- end  }}
@@ -93,8 +106,8 @@ containers:
       - name: shared-files
         mountPath: /usr/share/nginx/html
       - name: php-fpm-conf
-        mountPath: /usr/local/etc/php-fpm.d/www.conf
-        subPath: www.conf
+        mountPath: /usr/local/etc/php-fpm.d/php-fpm.conf
+        subPath: php-fpm.conf
 {{- if .Values.schedule.enabled }}
   - name: schedule
   {{- with .Values.securityContext }}
@@ -147,13 +160,18 @@ containers:
       - name: shared-files
         mountPath: /usr/share/nginx/html
       - name: php-fpm-conf
-        mountPath: /usr/local/etc/php-fpm.d/www.conf
-        subPath: www.conf
+        mountPath: /usr/local/etc/php-fpm.d/php-fpm.conf
+        subPath: php-fpm.conf
+{{- end }}
+{{- if .Values.extraContainers }}
+  {{- toYaml .Values.extraContainers | nindent 2 }}
 {{- end }}
 volumes:
+  {{ if .Values.nginx.enabled }}
   - name: nginx-config
     configMap:
-      name: {{ if .Values.nginx.configName }} {{ .Values.nginx.configName }} {{ else }} {{ .Release.Name }}-nginx-config {{ end }}
+      name: {{ if .Values.nginx.config.enabled }} {{ .Release.Name }}-nginx-config {{ else }} {{ .Values.nginx.config.name }} {{ end }}
+  {{- end }}
   - name: shared-files
     emptyDir: {}
   - name: php-fpm-conf
