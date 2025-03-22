@@ -1,0 +1,309 @@
+## Application configuration
+## https://github.com/fredychivalan/helm-charts
+#
+
+## Provide a name in place of `application`
+nameOverride: application
+## String to fully override `"application.fullname"`
+fullnameOverride: ""
+## Override the namespace
+## @default `.Release.Namespace`
+namespaceOverride: ""
+
+
+## Globally shared configuration
+global:
+  ## Domain
+  ## Used for ingresses, certificates
+  domain: ""
+
+  ## Common labels for the all resources
+  commonLabels: {}
+    # app: backend
+
+  ## Number of old deployment ReplicaSets to retain. The rest will be garbage collected.
+  revisionHistoryLimit: 5
+
+  ## Default image used by all components
+  image:
+    ## If defined, a repository applied to all Application deployments
+    repository: nginx
+    ## Overrides the global Application image tag whose default is the chart appVersion
+    tag: "alpine"
+    ## If defined, a imagePullPolicy applied to all Application deployments
+    imagePullPolicy: IfNotPresent
+
+  ## Secrets with credentials to pull images from a private registry
+  imagePullSecrets: []
+
+  ## Annotations for the all deployed Deployments
+  deploymentAnnotations: {}
+
+  ## Annotations for the all deployed pods
+  podAnnotations: {}
+
+  ## SecurityContext holds pod-level security attributes and common container settings.
+  ## This defaults to non root user with uid 1000 and gid 2000. *v1.PodSecurityContext  false
+  ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/
+  ##
+  podSecurityContext: {}
+    # sysctls: []
+    # fsGroupChangePolicy: Always
+    # supplementalGroups: []
+    # fsGroup: 65534
+    # runAsGroup: 65534
+    # runAsNonRoot: true
+    # runAsUser: 65534
+    # seccompProfile:
+    #   type: RuntimeDefault
+
+  ## Deployment strategy for the all deployed Deployments
+  deploymentStrategy: {}
+    # type: RollingUpdate
+    # rollingUpdate:
+    #   maxSurge: 25%
+    #   maxUnavailable: 25%
+
+  ## Environment variables to pass to all deployed Deployments
+  env: []
+
+## Applications
+application:
+  ## Enable Application 
+  enabled: true
+
+  ## Application name
+  name: application
+
+  ## The number of Application pods to run
+  replicaCount: 1
+
+  ## Application Horizontal Pod Autoscaler
+  autoscaling:
+    ## Enable Horizontal Pod Autoscaler ([HPA]) for the application
+    enabled: false
+    ## Minimum number of replicas for the application [HPA]
+    minReplicas: 1
+    ## Maximum number of replicas for the application [HPA]
+    maxReplicas: 5
+    ## Average CPU utilization percentage for the application [HPA]
+    targetCPUUtilizationPercentage: 85
+    ## Average memory utilization percentage for the application [HPA]
+    targetMemoryUtilizationPercentage: 85
+    ## Configures the scaling behavior of the target in both Up and Down directions.
+    behavior: {}
+      # scaleDown:
+      #  stabilizationWindowSeconds: 300
+      #  policies:
+      #   - type: Pods
+      #     value: 1
+      #     periodSeconds: 180
+      # scaleUp:
+      #   stabilizationWindowSeconds: 300
+      #   policies:
+      #   - type: Pods
+      #     value: 2
+      #     periodSeconds: 60
+    ## Configures custom HPA metrics for the Application
+    ## Ref: https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/
+    metrics: []
+
+  ## Application image
+  image:
+    ## Repository to use for the Application
+    ## @default `""` (defaults to global.image.repository)
+    repository: ""
+    ## Tag to use for the Application
+    ## @default `""` (defaults to global.image.tag)
+    tag: ""
+    ## Image pull policy for the Application
+    ## @default `""` (defaults to global.image.imagePullPolicy)
+    imagePullPolicy: ""
+
+  ## Secrets with credentials to pull images from a private registry
+  ## @default `[]` (defaults to global.imagePullSecrets)
+  imagePullSecrets: []
+
+  ## Environment variables to pass to Application
+  env: []
+
+  ## Annotations to be added to application Deployment
+  deploymentAnnotations: {}
+
+  ## Annotations to be added to Application pods
+  podAnnotations: {}
+
+  ## Resource limits and requests for the Application
+  resources: {}
+    # limits:
+    #   cpu: 100m
+    #   memory: 128Mi
+    # requests:
+    #   cpu: 50m
+    #   memory: 64Mi
+
+  ## Application container ports
+  containerPort: 80
+  containerPortName: http
+
+  ## Container-specific security context configuration
+  ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/
+  containerSecurityContext: {}
+    # allowPrivilegeEscalation: false
+    # readOnlyRootFilesystem: true
+    # capabilities:
+    #   drop:
+    #     - ALL
+
+  ## [Node selector]
+  ## @default `{}` (defaults to global.nodeSelector)
+  nodeSelector: {}
+
+  ## [Tolerations] for use with node taints
+  ## @default `[]` (defaults to global.tolerations)
+  tolerations: []
+
+  ## Assign custom [affinity] rules to the deployment
+  ## @default `{}` (defaults to global.affinity preset)
+  affinity: {}
+
+  ## Deployment strategy to be added to the application Deployment
+  deploymentStrategy: {}
+    # type: RollingUpdate
+    # rollingUpdate:
+    #   maxSurge: 25%
+    #   maxUnavailable: 25%
+
+  ## Application service configuration
+  service:
+    enabled: false
+    ## Application service annotations
+    annotations: {}
+    ## Application service labels
+    labels: {}
+    clusterIP: ""
+    ## Application service type. One of ClusterIP, NodePort or LoadBalancer
+    ## @default `NodePort`
+    type: NodePort
+    ## Application service port
+    servicePort: 80
+    ## Application service port name
+    servicePortName: http
+    ## Node ports to expose
+    nodePortHttp: ""
+    ## Application service https port appProtocol
+    ## Ref: https://kubernetes.io/docs/concepts/services-networking/service/#application-protocol
+    servicePortHttpsAppProtocol: ""
+    ## The class of the load balancer implementation
+    loadBalancerClass: ""
+    ## LoadBalancer will get created with the IP specified in this field
+    loadBalancerIP: ""
+    ## Source IP ranges to allow access to service from
+    ## EKS Ref: https://repost.aws/knowledge-center/eks-cidr-ip-address-loadbalancer
+    ## GKE Ref: https://cloud.google.com/kubernetes-engine/docs/concepts/network-overview#limit-connectivity-ext-lb
+    loadBalancerSourceRanges: []
+    ## Application service external IPs
+    externalIPs: []
+    ## externalTrafficPolicy is applicable to service with externally-facing addresses (NodePorts, ExternalIPs, and LoadBalancer IPs)
+    ## Ref: https://kubernetes.io/docs/tasks/access-application-cluster/create-external-load-balancer/#preserving-the-client-source-ip
+    externalTrafficPolicy: ""  # Cluster
+    ## Used to maintain session affinity. Supports `ClientIP` and `None`
+    ## Ref: https://kubernetes.io/docs/concepts/services-networking/service/#virtual-ips-and-service-proxies
+    sessionAffinity: ""
+    ## Additional port to define in the Service
+    additionalPorts: []
+      # additionalPorts:
+      # - name: authenticated
+      #   port: 8081
+      #   targetPort: 8081
+
+  ## Automount API credentials for the Service Account into the pod.
+  automountServiceAccountToken: false
+
+  serviceAccount:
+    ## Create Application service account
+    create: true
+    ## Application service account name
+    name: ""
+    ## Annotations applied to created service account
+    annotations: {}
+    ## Labels applied to created service account
+    labels: {}
+    ## Automount API credentials for the Service Account
+    automountServiceAccountToken: false
+
+  ## Application ingress configuration
+  ingress:
+    ## Enable an ingress resource for the Application
+    enabled: false
+    ## Additional ingress labels
+    labels: {}
+    ## Additional ingress annotations
+    annotations: {}
+      # nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+      # nginx.ingress.kubernetes.io/ssl-passthrough: "true"
+
+    ## Defines which ingress controller will implement the resource
+    ingressClassName: ""
+
+    ## Application hostname
+    ## @default `""` (defaults to global.domain)
+    hostname: ""
+
+    ## The path to Application
+    path: /
+
+    ## Ingress path type. One of `Exact`, `Prefix` or `ImplementationSpecific`
+    ## @default `ImplementationSpecific`
+    pathType: ImplementationSpecific
+
+    ## Enable TLS configuration for the hostname defined at `application.ingress.hostname`
+    ## TLS certificate will be retrieved from a TLS secret `{{ include "application.fullname" . }}-tls`
+    ## You can create this secret via `certificate` or `certificateSecret` option
+    tls: false
+
+    ## The list of additional hostnames to be covered by ingress record
+    ## @default `[]` (See [values.yaml])
+    extraHosts: []
+      # - name: api.application.com
+      #   path: /
+
+    ## Additional ingress paths
+    ## @default `[]` (See [values.yaml])
+    ## Note: Supports use of custom Helm templates
+    extraPaths: []
+      # - path: /*
+      #   pathType: Prefix
+      #   backend:
+      #     service:
+      #       name: ssl-redirect
+      #       port:
+      #         name: use-annotation
+      # - path: /
+      #   pathType: ImplementationSpecific
+      #   backend:
+      #     service:
+      #       name: '{{ include "application.fullname" . }}'
+      #       port:
+      #         name: '{{ .Values.application.service.servicePortName }}'
+
+    ## Additional ingress rules
+    ## @default `[]` (See [values.yaml])
+    ## Note: Supports use of custom Helm templates
+    extraRules: []
+      # - http:
+      #     paths:
+      #     - path: /
+      #       pathType: Prefix
+      #       backend:
+      #         service:
+      #           name: '{{ include "application.fullname" . }}'
+      #           port:
+      #             name: '{{ .Values.application.service.servicePortName }}'
+
+    ## Additional TLS configuration
+    ## @default `[]` (See [values.yaml])
+    extraTls: []
+      # - hosts:
+      #   - api.application.com
+      #   secretName: your-certificate-name

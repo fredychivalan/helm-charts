@@ -1,0 +1,62 @@
+{{- if and .Values.application.enabled .Values.application.service.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  {{- with .Values.application.service.annotations }}
+  annotations:
+    {{- range $key, $value := . }}
+    {{ $key }}: {{ $value | quote }}
+    {{- end }}
+  {{- end }}
+  labels:
+    {{- include "application.standardLabels" . | nindent 4 }}
+    {{- with .Values.application.service.labels }}
+      {{- toYaml . | nindent 4 }}
+    {{- end }}
+  name: {{ include "application.fullname" . }}
+  namespace: {{ include  "application.namespace" . }}
+spec:
+{{- if and .Values.application.service.clusterIP (eq .Values.application.service.type "ClusterIP") }}
+  clusterIP: {{ .Values.application.service.clusterIP }}
+{{- end }}
+{{- with .Values.application.service.externalIPs }}
+  externalIPs: {{ . }}
+{{- end }}
+{{- if or (eq .Values.application.service.type "LoadBalancer") (eq .Values.application.service.type "NodePort") }}
+  externalTrafficPolicy: {{ .Values.application.service.externalTrafficPolicy | quote }}
+{{- end }}
+{{- if eq .Values.application.service.type "LoadBalancer" }}
+  {{- with .Values.application.service.loadBalancerClass }}
+  loadBalancerClass: {{ . }}
+  {{- end }}
+  {{- with .Values.application.service.loadBalancerIP }}
+  loadBalancerIP: {{ . }}
+  {{- end }}
+  {{- with .Values.application.service.loadBalancerSourceRanges }}
+  loadBalancerSourceRanges:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+{{- end }}
+  ports:
+  - name: {{ .Values.application.service.servicePortName }}
+    protocol: TCP
+    port: {{ .Values.application.service.servicePort }}
+    targetPort: {{ .Values.application.containerPort }}
+    {{- if (and (or (eq .Values.application.service.type "NodePort") (eq .Values.application.service.type "LoadBalancer")) (not (empty .Values.application.service.nodePortHttp))) }}
+    nodePort: {{ .Values.application.service.nodePortHttp }}
+    {{- else if eq .Values.application.service.type "ClusterIP" }}
+    nodePort: null
+    {{- end }}
+    {{- with .Values.application.service.servicePortHttpsAppProtocol }}
+    appProtocol: {{ . }}
+    {{- end }}
+  {{- if .Values.application.service.additionalPorts }}
+  {{ toYaml .Values.application.service.additionalPorts | indent 4 }}
+  {{- end }}
+  selector:
+    {{- include "application.selectorLabels" . | nindent 4 }}
+  {{- if .Values.application.service.sessionAffinity }}
+  sessionAffinity: {{ .Values.application.service.sessionAffinity }}
+  {{- end }}
+  type: {{ .Values.application.service.type }}
+{{- end }}

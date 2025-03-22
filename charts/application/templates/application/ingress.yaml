@@ -1,0 +1,79 @@
+{{- if and .Values.application.enabled .Values.application.ingress.enabled -}}
+{{- $fullName := include "application.fullname" . -}}
+{{- $servicePort := .Values.application.service.servicePort -}}
+{{- if and .Values.application.ingress.className (not (semverCompare ">=1.18-0" .Capabilities.KubeVersion.GitVersion)) }}
+  {{- if not (hasKey .Values.ingress.annotations "kubernetes.io/ingress.class") }}
+  {{- $_ := set .Values.ingress.annotations "kubernetes.io/ingress.class" .Values.ingress.className}}
+  {{- end }}
+{{- end }}
+{{- if semverCompare ">=1.19-0" .Capabilities.KubeVersion.GitVersion -}}
+apiVersion: networking.k8s.io/v1
+{{- else if semverCompare ">=1.14-0" .Capabilities.KubeVersion.GitVersion -}}
+apiVersion: networking.k8s.io/v1beta1
+{{- else -}}
+apiVersion: extensions/v1beta1
+{{- end }}
+kind: Ingress
+metadata:
+{{- if .Values.application.ingress.annotations }}
+  annotations:
+{{ toYaml .Values.application.ingress.annotations | indent 4 }}
+{{- end }}
+  labels:
+    {{- include "application.standardLabels" . | nindent 4 }}
+    {{- with .Values.application.ingress.labels }}
+      {{- toYaml . | nindent 4 }}
+    {{- end }}
+  name: {{ $fullName }}
+  namespace: {{ include  "application.namespace" . }}
+spec:
+  {{- if and .Values.application.ingress.ingressClassName (semverCompare ">=1.18-0" .Capabilities.KubeVersion.GitVersion) }}
+  ingressClassName: {{ .Values.application.ingress.ingressClassName }}
+  {{- end }}
+  rules:
+    - host: {{ tpl (.Values.application.ingress.hostname) $ | default .Values.global.domain }}
+      http:
+        paths:
+          {{- with .Values.application.ingress.extraPaths }}
+            {{- tpl (toYaml .) $ | nindent 10 }}
+          {{- end }}
+          - path: {{ .Values.application.ingress.path }}
+            pathType: {{ $.Values.application.ingress.pathType }}
+            backend:
+              service:
+                name: {{ $fullName }}
+                port:
+                  number: {{ $servicePort }}
+    {{- range .Values.application.ingress.extraHosts }}
+    - host: {{ tpl .name $ | quote }}
+      http:
+        paths:
+          - path: {{ default $.Values.application.ingress.path .path }}
+            pathType: {{ default $.Values.application.ingress.pathType .pathType }}
+            backend:
+              service:
+                name: {{ $fullName }}
+                port:
+                  number: {{ $servicePort }}
+    {{- end }}
+    {{- with .Values.application.ingress.extraRules }}
+      {{- tpl (toYaml .) $ | nindent 4 }}
+    {{- end }}
+  {{- if or .Values.application.ingress.tls .Values.application.ingress.extraTls }}
+  tls:
+    {{- if .Values.application.ingress.tls }}
+    - hosts:
+      - {{ tpl (.Values.application.ingress.hostname) $ | default .Values.global.domain }}
+      {{- range .Values.application.ingress.extraHosts }}
+        {{- if .name }}
+      - {{ tpl .name $ }}
+        {{- end }}
+      {{- end }}
+      secretName: {{ $fullName }}-tls
+    {{- end }}
+    {{- with .Values.application.ingress.extraTls }}
+      {{- tpl (toYaml .) $ | nindent 4 }}
+    {{- end }}
+  {{- end }}
+{{- end }}
+
