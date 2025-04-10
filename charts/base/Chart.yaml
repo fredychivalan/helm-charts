@@ -1,0 +1,18 @@
+apiVersion: v2
+name: base
+description: A foundational Helm chart providing basic configurations.
+type: library
+
+version: 0.1.1
+appVersion: master
+
+keywords:
+  - base
+  - foundational
+  - common
+  - generic
+  - aspe.net
+
+maintainers:
+  - name: Fredy Chivalán
+    email: c3.fredy@gmail.com
