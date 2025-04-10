@@ -42,6 +42,26 @@ entries:
     urls:
     - https://github.com/fredychivalan/helm-charts/releases/download/aspnet-1.1.2/aspnet-1.1.2.tgz
     version: 1.1.2
+  base:
+  - apiVersion: v2
+    appVersion: master
+    created: "2025-04-10T22:09:31.988918539Z"
+    description: A foundational Helm chart providing basic configurations.
+    digest: f135ba3884ce4f5e0a56645fc0ba0ab52b8f399bb931fd1cbe10a6f92676d5b9
+    keywords:
+    - base
+    - foundational
+    - common
+    - generic
+    - aspe.net
+    maintainers:
+    - email: c3.fredy@gmail.com
+      name: Fredy Chivalán
+    name: base
+    type: library
+    urls:
+    - https://github.com/fredychivalan/helm-charts/releases/download/base-0.1.1/base-0.1.1.tgz
+    version: 0.1.1
   laravel:
   - apiVersion: v2
     appVersion: "1.6"
@@ -76,4 +96,4 @@ entries:
     urls:
     - https://github.com/fredychivalan/helm-charts/releases/download/laravel-1.2.5/laravel-1.2.5.tgz
     version: 1.2.5
-generated: "2025-03-22T04:01:58.592925485Z"
+generated: "2025-04-10T22:09:31.988936293Z"
