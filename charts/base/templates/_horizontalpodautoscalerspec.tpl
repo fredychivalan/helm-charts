@@ -2,7 +2,7 @@
 HorizontalPodAutoscalerSpec
 ref: https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.32/#horizontalpodautoscalerspec-v2-autoscaling
 */}}
-{{- define "base.horizontalpodautoscalerspec" -}}
+{{- define "base.horizontalPodAutoscalerSpec" -}}
 {{- $context := .context }}
 {{- $instance := .instance }}
 {{- $instanceName := .instanceName }}

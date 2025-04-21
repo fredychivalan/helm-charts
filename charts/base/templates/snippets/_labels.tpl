@@ -2,20 +2,20 @@
 Standard labels
 */}}
 {{- define "base.standardLabels" -}}
-{{ include "base.selectorLabels" . }}
-app.kubernetes.io/managed-by: {{ .Release.Service }}
-{{- if .Chart.AppVersion }}
-app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
+{{ include "base.selectorLabels" (dict "context" .context "instanceName" .instanceName ) }}
+app.kubernetes.io/managed-by: {{ .context.Release.Service }}
+{{- if .context.Chart.AppVersion }}
+app.kubernetes.io/version: {{ .context.Chart.AppVersion | quote }}
 {{- end }}
-helm.sh/chart: {{ include "base.chart" . }}
+helm.sh/chart: {{ include "base.chart" .context }}
 {{- end -}}
 
 {{/*
 Selector labels
 */}}
 {{- define "base.selectorLabels" -}}
-app.kubernetes.io/instance: {{ .Release.Name }}
-app.kubernetes.io/name: {{ include "base.name" . }}
+app.kubernetes.io/instance: {{ .context.Release.Name }}
+app.kubernetes.io/name: {{ include "base.instance.fullname" (dict "context" .context "instanceName" .instanceName) }}
 {{- end -}}
 
 {{/*

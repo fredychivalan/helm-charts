@@ -27,5 +27,9 @@ If release name contains chart name it will be used as a full name.
 Base Instance fullname
 */}}
 {{- define "base.instance.fullname" -}}
+{{- if or .context.Values.fullnameOverride .context.Values.nameOverride -}}
 {{- printf "%s-%s" (include "base.fullname" .context ) .instanceName | trunc 52 | trimSuffix "-" -}}
+{{- else -}}
+{{- printf "%s" .instanceName | trunc 52 | trimSuffix "-" -}}
+{{- end -}}
 {{- end -}}
