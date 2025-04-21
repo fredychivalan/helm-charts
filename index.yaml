@@ -45,6 +45,25 @@ entries:
   base:
   - apiVersion: v2
     appVersion: master
+    created: "2025-04-21T19:10:14.721380647Z"
+    description: A foundational Helm chart providing basic configurations.
+    digest: bda67979376e74e515b3f2aaef6b6958ac1f73de1f39cca39420eeb7fb948782
+    keywords:
+    - base
+    - foundational
+    - common
+    - generic
+    - utility
+    maintainers:
+    - email: c3.fredy@gmail.com
+      name: Fredy Chivalán
+    name: base
+    type: library
+    urls:
+    - https://github.com/fredychivalan/helm-charts/releases/download/base-1.1.0/base-1.1.0.tgz
+    version: 1.1.0
+  - apiVersion: v2
+    appVersion: master
     created: "2025-04-10T22:09:31.988918539Z"
     description: A foundational Helm chart providing basic configurations.
     digest: f135ba3884ce4f5e0a56645fc0ba0ab52b8f399bb931fd1cbe10a6f92676d5b9
@@ -96,4 +115,4 @@ entries:
     urls:
     - https://github.com/fredychivalan/helm-charts/releases/download/laravel-1.2.5/laravel-1.2.5.tgz
     version: 1.2.5
-generated: "2025-04-10T22:09:31.988936293Z"
+generated: "2025-04-21T19:10:14.721402749Z"
