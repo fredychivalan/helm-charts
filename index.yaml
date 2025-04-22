@@ -3,6 +3,30 @@ entries:
   application:
   - apiVersion: v2
     appVersion: master
+    created: "2025-04-22T05:33:14.772976177Z"
+    dependencies:
+    - name: base
+      repository: https://fredychivalan.github.io/helm-charts
+      version: 1.1.0
+    description: Flexible and language-agnostic Helm chart for standardized deployment
+      of general applications in Kubernetes.
+    digest: 5a7fd3d920f45cf1b15a240c11c479b87a560fcdc3e186d29797bb2befbe7afe
+    keywords:
+    - application
+    - asp.net
+    - netcore
+    - nodejs
+    - backend
+    maintainers:
+    - email: c3.fredy@gmail.com
+      name: Fredy Chivalán
+    name: application
+    type: application
+    urls:
+    - https://github.com/fredychivalan/helm-charts/releases/download/application-1.1.1/application-1.1.1.tgz
+    version: 1.1.1
+  - apiVersion: v2
+    appVersion: master
     created: "2025-03-22T04:01:58.592888326Z"
     description: A Helm chart for Kubernetes
     digest: 14d4c6db001b94237881f58d8ebd111c9f1471159157244ad7584d7a24326d6b
@@ -115,4 +139,4 @@ entries:
     urls:
     - https://github.com/fredychivalan/helm-charts/releases/download/laravel-1.2.5/laravel-1.2.5.tgz
     version: 1.2.5
-generated: "2025-04-21T19:10:14.721402749Z"
+generated: "2025-04-22T05:33:14.773001104Z"
