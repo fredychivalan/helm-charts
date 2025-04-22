@@ -1,9 +1,9 @@
-{{- if and .Values.application.enabled .Values.application.ingress.enabled -}}
+{{- if and .Values.backend.enabled .Values.backend.ingress.enabled -}}
 {{- $global := .Values.global -}}
-{{- $instance := .Values.application.ingress -}}
-{{- $instanceName := .Values.application.name -}}
+{{- $instance := .Values.backend.ingress -}}
+{{- $instanceName := .Values.backend.name -}}
 {{- $fullName := include "base.instance.fullname" (dict "context" $ "instanceName" $instanceName) -}}
-{{- $servicePort := .Values.application.service.servicePort -}}
+{{- $servicePort := .Values.backend.service.servicePort -}}
 {{- if and $instance.className (not (semverCompare ">=1.18-0" .Capabilities.KubeVersion.GitVersion)) }}
   {{- if not (hasKey $instance.annotations "kubernetes.io/ingress.class") }}
   {{- $_ := set $instance.annotations "kubernetes.io/ingress.class" $instance.className}}

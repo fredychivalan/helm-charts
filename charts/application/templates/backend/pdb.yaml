@@ -1,0 +1,11 @@
+{{- if and .Values.backend.enabled .Values.backend.pdb.enabled }}
+{{- $global := .Values.global -}}
+{{- $instance := .Values.backend.pdb -}}
+{{- $instanceName := .Values.backend.name -}}
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  {{- include "base.metadata" (dict "context" $ "global" $global "instanceName" $instanceName "instance" $instance ) | nindent 2 }}
+spec:
+  {{- include "base.podDisruptionBudgetSpec" (dict "context" $ "instance" $instance "instanceName" $instanceName) | indent 2 }}
+{{- end }}

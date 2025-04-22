@@ -1,6 +1,6 @@
-{{- if .Values.application.enabled }}
+{{- if .Values.backend.enabled }}
 {{- $global := .Values.global -}}
-{{- $instance := .Values.application -}}
+{{- $instance := .Values.backend -}}
 {{- $instanceName := $instance.name -}}
 apiVersion: apps/v1
 kind: Deployment

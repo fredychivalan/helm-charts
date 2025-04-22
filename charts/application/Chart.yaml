@@ -1,9 +1,24 @@
 apiVersion: v2
 name: application
-description: A Helm chart for Kubernetes
+description: Flexible and language-agnostic Helm chart for standardized deployment of general applications in Kubernetes.
 
 type: application
 
-version: 0.1.1-v1beta1
-
+version: 1.1.1
 appVersion: master
+
+keywords:
+  - application
+  - asp.net
+  - netcore
+  - nodejs
+  - backend
+
+dependencies:
+- name: base
+  repository: "https://fredychivalan.github.io/helm-charts"
+  version: 1.1.0
+
+maintainers:
+  - name: Fredy Chivalán
+    email: c3.fredy@gmail.com
