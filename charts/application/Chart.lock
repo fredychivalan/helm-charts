@@ -1,6 +1,0 @@
-dependencies:
-- name: base
-  repository: https://fredychivalan.github.io/helm-charts
-  version: 1.1.0
-digest: sha256:0ca5bb05e4f219a6bef84ee960af3cbe55ee29f27eadffa6c0f3d012d442e114
-generated: "2025-04-21T13:15:26.917682534-06:00"
