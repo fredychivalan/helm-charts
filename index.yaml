@@ -38,6 +38,16 @@ entries:
   aspnet:
   - apiVersion: v2
     appVersion: 1.3.0
+    created: "2026-04-07T17:28:14.081644711Z"
+    description: Helm chart for ASP.NET applications
+    digest: ab7772124dcba451570b91f53391b1acc3d5e21912e560f42fc60643f57411d8
+    name: aspnet
+    type: application
+    urls:
+    - https://github.com/fredychivalan/helm-charts/releases/download/aspnet-1.1.5/aspnet-1.1.5.tgz
+    version: 1.1.5
+  - apiVersion: v2
+    appVersion: 1.3.0
     created: "2025-02-04T18:07:48.860832202Z"
     description: Helm chart for ASP.NET applications
     digest: 69f35c55d1a5de0bae9f7e91571a41852032b03b1f4ac287d9da7fe453550e45
@@ -139,4 +149,4 @@ entries:
     urls:
     - https://github.com/fredychivalan/helm-charts/releases/download/laravel-1.2.5/laravel-1.2.5.tgz
     version: 1.2.5
-generated: "2025-04-22T05:33:14.773001104Z"
+generated: "2026-04-07T17:28:14.081677262Z"
