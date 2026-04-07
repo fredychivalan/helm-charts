@@ -30,7 +30,7 @@ initContainers:
 {{- end -}}
 {{- end }}
 containers:
-  - name: {{ .Chart.Name }}
+  - name: {{ include "aspnet.fullname" . }}
   {{- with .Values.securityContext }}
     securityContext:
       {{- toYaml . | nindent 6 }}
