@@ -198,3 +198,37 @@ initContainers: []
 #   - name: do-something
 #     image: bitnami/kubectl:{{ .Capabilities.KubeVersion.Major }}.{{ .Capabilities.KubeVersion.Minor }}
 #     command: ['kubectl', 'version']
+
+# extraObjects:
+#   # Example 1: KEDA ScaledObject
+#   - apiVersion: keda.sh/v1alpha1
+#     kind: ScaledObject
+#     metadata:
+#       name: '{{ include "aspnet.fullname" . }}-scaler'
+#     spec:
+#       scaleTargetRef:
+#         name: '{{ include "aspnet.fullname" . }}'
+#       minReplicaCount: 1
+#       maxReplicaCount: 10
+#       triggers:
+#         - type: cpu
+#           metadata:
+#             value: "60"
+# 
+#   # Example 2: Job pre-install
+#   - apiVersion: batch/v1
+#     kind: Job
+#     metadata:
+#       name: '{{ include "aspnet.fullname" . }}-ef-migration'
+#       annotations:
+#         "helm.sh/hook": pre-install,pre-upgrade
+#         "helm.sh/hook-weight": "-5"
+#         "helm.sh/hook-delete-policy": hook-succeeded
+#     spec:
+#       template:
+#         spec:
+#           restartPolicy: Never
+#           containers:
+#             - name: migrator
+#               image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+#               command: ["dotnet", "ef", "database", "update"]

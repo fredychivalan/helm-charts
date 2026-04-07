@@ -7,7 +7,7 @@ Helm chart for Laravel applications
 To add the `aspnet` helm repo, run:
 
 ```sh
-helm repo add apps https:///fredychivalan.github.io/helm-charts
+helm repo add apps https://fredychivalan.github.io/helm-charts
 ```
 
 To install a release named `apps`, run:
