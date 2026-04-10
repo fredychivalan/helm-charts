@@ -19,7 +19,7 @@ imagePullSecrets: []
 ## Number of replicas of each shard to deploy for a ASP.NET deployment.
 ## Number of replicas multiplied by shards is the total number of Pods created.
 ##
-replicaCount: 1
+# replicaCount: 1
 
 ## Image of ASP.NET
 ##
