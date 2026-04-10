@@ -5,7 +5,7 @@ metadata:
   labels:
     {{- include "aspnet.labels" . | nindent 4 }}
 spec:
-  {{- if not .Values.autoscaling.enabled }}
+  {{- if .Values.replicaCount }}
   replicas: {{ .Values.replicaCount }}
   {{- end }}
   {{- with .Values.updateStrategy }}
