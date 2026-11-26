@@ -1,0 +1,1527 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "additionalProperties": false,
+  "description": "Strict closed-world Draft-07 schema for argocd-gitops-platform.",
+  "properties": {
+    "appProjects": {
+      "additionalProperties": false,
+      "description": "Dedicated Argo CD AppProject resources provisioned alongside ApplicationSets.",
+      "patternProperties": {
+        "^[a-z0-9]([-a-z0-9]*[a-z0-9])?$": {
+          "additionalProperties": false,
+          "properties": {
+            "annotations": {
+              "additionalProperties": false,
+              "description": "Additional annotations applied to AppProject metadata.",
+              "patternProperties": {
+                "^([a-z0-9]([-a-z0-9.]*[a-z0-9])?/)?[a-zA-Z0-9]([a-zA-Z0-9._-]*[a-zA-Z0-9])?$": {
+                  "type": "string"
+                }
+              },
+              "type": "object"
+            },
+            "clusterResourceBlacklist": {
+              "description": "Denied cluster-scoped Kubernetes resource types.",
+              "items": {
+                "additionalProperties": false,
+                "properties": {
+                  "group": {
+                    "description": "Kubernetes API group (empty string for core resources).",
+                    "type": "string"
+                  },
+                  "kind": {
+                    "description": "Kubernetes resource kind.",
+                    "minLength": 1,
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "group",
+                  "kind"
+                ],
+                "type": "object"
+              },
+              "type": "array"
+            },
+            "clusterResourceWhitelist": {
+              "description": "Permitted cluster-scoped Kubernetes resource types.",
+              "items": {
+                "additionalProperties": false,
+                "properties": {
+                  "group": {
+                    "description": "Kubernetes API group (empty string for core resources).",
+                    "type": "string"
+                  },
+                  "kind": {
+                    "description": "Kubernetes resource kind.",
+                    "minLength": 1,
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "group",
+                  "kind"
+                ],
+                "type": "object"
+              },
+              "type": "array"
+            },
+            "description": {
+              "description": "Human-readable AppProject description (max 255 characters).",
+              "maxLength": 255,
+              "type": "string"
+            },
+            "destinations": {
+              "description": "Permitted destination cluster and namespace targets.",
+              "items": {
+                "additionalProperties": false,
+                "anyOf": [
+                  {
+                    "required": [
+                      "server"
+                    ]
+                  },
+                  {
+                    "required": [
+                      "name"
+                    ]
+                  }
+                ],
+                "not": {
+                  "required": [
+                    "name",
+                    "server"
+                  ]
+                },
+                "properties": {
+                  "name": {
+                    "description": "Permitted logical cluster name (mutually exclusive with server).",
+                    "minLength": 1,
+                    "type": "string"
+                  },
+                  "namespace": {
+                    "description": "Permitted namespace or glob pattern in the target cluster.",
+                    "minLength": 1,
+                    "type": "string"
+                  },
+                  "server": {
+                    "description": "Permitted cluster API URL (mutually exclusive with name).",
+                    "minLength": 1,
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "namespace"
+                ],
+                "type": "object"
+              },
+              "minItems": 1,
+              "type": "array"
+            },
+            "enabled": {
+              "default": true,
+              "description": "Enables or disables provisioning this AppProject.",
+              "type": "boolean"
+            },
+            "labels": {
+              "additionalProperties": false,
+              "description": "Additional labels applied to AppProject metadata.",
+              "patternProperties": {
+                "^([a-z0-9]([-a-z0-9.]*[a-z0-9])?/)?[a-zA-Z0-9]([a-zA-Z0-9._-]*[a-zA-Z0-9])?$": {
+                  "type": "string"
+                }
+              },
+              "type": "object"
+            },
+            "namespaceResourceBlacklist": {
+              "description": "Denied namespace-scoped Kubernetes resource types.",
+              "items": {
+                "additionalProperties": false,
+                "properties": {
+                  "group": {
+                    "description": "Kubernetes API group (empty string for core resources).",
+                    "type": "string"
+                  },
+                  "kind": {
+                    "description": "Kubernetes resource kind.",
+                    "minLength": 1,
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "group",
+                  "kind"
+                ],
+                "type": "object"
+              },
+              "type": "array"
+            },
+            "namespaceResourceWhitelist": {
+              "description": "Permitted namespace-scoped Kubernetes resource types.",
+              "items": {
+                "additionalProperties": false,
+                "properties": {
+                  "group": {
+                    "description": "Kubernetes API group (empty string for core resources).",
+                    "type": "string"
+                  },
+                  "kind": {
+                    "description": "Kubernetes resource kind.",
+                    "minLength": 1,
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "group",
+                  "kind"
+                ],
+                "type": "object"
+              },
+              "type": "array"
+            },
+            "orphanedResources": {
+              "additionalProperties": false,
+              "description": "Orphaned resource monitoring settings for this project.",
+              "properties": {
+                "warn": {
+                  "description": "Emits warnings when orphaned resources exist in target namespaces.",
+                  "type": "boolean"
+                }
+              },
+              "type": "object"
+            },
+            "sourceNamespaces": {
+              "description": "Namespaces allowed to host Applications referencing this project.",
+              "items": {
+                "minLength": 1,
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "sourceRepos": {
+              "description": "Explicit list of source repositories permitted for this project.",
+              "items": {
+                "minLength": 1,
+                "type": "string"
+              },
+              "minItems": 1,
+              "type": "array"
+            }
+          },
+          "required": [
+            "destinations",
+            "enabled",
+            "sourceRepos"
+          ],
+          "type": "object"
+        }
+      },
+      "type": "object"
+    },
+    "appsetsHelm": {
+      "additionalProperties": false,
+      "description": "Multi-source Helm ApplicationSets (chart source plus $values Git reference).",
+      "patternProperties": {
+        "^[a-z0-9]([-a-z0-9]*[a-z0-9])?$": {
+          "additionalProperties": false,
+          "properties": {
+            "applicationAnnotations": {
+              "additionalProperties": false,
+              "description": "Annotations merged onto Applications produced by this ApplicationSet.",
+              "patternProperties": {
+                "^([a-z0-9]([-a-z0-9.]*[a-z0-9])?/)?[a-zA-Z0-9]([a-zA-Z0-9._-]*[a-zA-Z0-9])?$": {
+                  "type": "string"
+                }
+              },
+              "type": "object"
+            },
+            "applicationLabels": {
+              "additionalProperties": false,
+              "description": "Labels merged onto Applications produced by this ApplicationSet.",
+              "patternProperties": {
+                "^([a-z0-9]([-a-z0-9.]*[a-z0-9])?/)?[a-zA-Z0-9]([a-zA-Z0-9._-]*[a-zA-Z0-9])?$": {
+                  "type": "string"
+                }
+              },
+              "type": "object"
+            },
+            "applicationNameTemplate": {
+              "default": "{{ .metadata.labels.environment }}-{{ .path.basename }}",
+              "description": "Go template string used for generated Application metadata.name.",
+              "minLength": 1,
+              "type": "string"
+            },
+            "destination": {
+              "additionalProperties": false,
+              "description": "Target cluster and namespace override for generated Applications.",
+              "not": {
+                "required": [
+                  "name",
+                  "server"
+                ]
+              },
+              "properties": {
+                "name": {
+                  "description": "Target cluster logical name or Go template (mutually exclusive with server).",
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "namespace": {
+                  "description": "Target namespace or Go template in the destination cluster.",
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "server": {
+                  "description": "Target cluster API server URL or Go template (mutually exclusive with name).",
+                  "minLength": 1,
+                  "type": "string"
+                }
+              },
+              "type": "object"
+            },
+            "enabled": {
+              "default": true,
+              "description": "Enables or disables rendering this ApplicationSet.",
+              "type": "boolean"
+            },
+            "generators": {
+              "additionalProperties": false,
+              "description": "Matrix generator pairing clusters and Git file discovery.",
+              "properties": {
+                "matrix": {
+                  "additionalProperties": false,
+                  "description": "Matrix generator combining cluster selection and Git file discovery.",
+                  "properties": {
+                    "clusters": {
+                      "additionalProperties": false,
+                      "anyOf": [
+                        {
+                          "required": [
+                            "matchLabels"
+                          ]
+                        },
+                        {
+                          "required": [
+                            "matchExpressions"
+                          ]
+                        }
+                      ],
+                      "description": "Non-empty cluster selector for matrix targeting.",
+                      "properties": {
+                        "matchExpressions": {
+                          "description": "Set-based cluster label selector expressions.",
+                          "items": {
+                            "additionalProperties": false,
+                            "properties": {
+                              "key": {
+                                "description": "Cluster label key to evaluate.",
+                                "minLength": 1,
+                                "type": "string"
+                              },
+                              "operator": {
+                                "description": "Label matching operator (In, NotIn, Exists, or DoesNotExist).",
+                                "enum": [
+                                  "In",
+                                  "NotIn",
+                                  "Exists",
+                                  "DoesNotExist"
+                                ],
+                                "type": "string"
+                              },
+                              "values": {
+                                "description": "Allowed values for In or NotIn operators.",
+                                "items": {
+                                  "minLength": 1,
+                                  "type": "string"
+                                },
+                                "type": "array"
+                              }
+                            },
+                            "required": [
+                              "key",
+                              "operator"
+                            ],
+                            "type": "object"
+                          },
+                          "minItems": 1,
+                          "type": "array"
+                        },
+                        "matchLabels": {
+                          "additionalProperties": false,
+                          "description": "Exact cluster label key-value pairs required to match target clusters.",
+                          "minProperties": 1,
+                          "patternProperties": {
+                            "^([a-z0-9]([-a-z0-9.]*[a-z0-9])?/)?[a-zA-Z0-9]([a-zA-Z0-9._-]*[a-zA-Z0-9])?$": {
+                              "type": "string"
+                            }
+                          },
+                          "type": "object"
+                        }
+                      },
+                      "type": "object"
+                    },
+                    "git": {
+                      "additionalProperties": false,
+                      "description": "Git file discovery source.",
+                      "properties": {
+                        "files": {
+                          "description": "File glob patterns discovered by the Git generator.",
+                          "items": {
+                            "minLength": 1,
+                            "pattern": "^([^*]|\\*[^*])*\\*?$",
+                            "type": "string"
+                          },
+                          "minItems": 1,
+                          "type": "array"
+                        },
+                        "pathParamPrefix": {
+                          "description": "Optional prefix applied to generated path parameters.",
+                          "minLength": 1,
+                          "type": "string"
+                        },
+                        "repoURL": {
+                          "description": "Git repository URL hosting Helm value files and discovery paths.",
+                          "minLength": 1,
+                          "type": "string"
+                        },
+                        "requeueAfterSeconds": {
+                          "description": "Git generator polling interval in seconds.",
+                          "maximum": 86400,
+                          "minimum": 10,
+                          "type": "integer"
+                        },
+                        "targetRevision": {
+                          "description": "Git branch, tag, or commit revision to track.",
+                          "minLength": 1,
+                          "type": "string"
+                        },
+                        "values": {
+                          "additionalProperties": false,
+                          "description": "Static key-value parameters exposed to the ApplicationSet template.",
+                          "patternProperties": {
+                            "^[a-zA-Z0-9._-]+$": {
+                              "type": "string"
+                            }
+                          },
+                          "type": "object"
+                        }
+                      },
+                      "required": [
+                        "files",
+                        "repoURL",
+                        "targetRevision"
+                      ],
+                      "type": "object"
+                    }
+                  },
+                  "required": [
+                    "clusters",
+                    "git"
+                  ],
+                  "type": "object"
+                }
+              },
+              "required": [
+                "matrix"
+              ],
+              "type": "object"
+            },
+            "ignoreDifferences": {
+              "description": "Additional ignoreDifferences rules appended after global rules.",
+              "items": {
+                "additionalProperties": false,
+                "properties": {
+                  "group": {
+                    "description": "API group of the resource to ignore.",
+                    "type": "string"
+                  },
+                  "jqPathExpressions": {
+                    "description": "jq expressions excluded from diff comparison.",
+                    "items": {
+                      "minLength": 1,
+                      "type": "string"
+                    },
+                    "type": "array"
+                  },
+                  "jsonPointers": {
+                    "description": "RFC 6901 JSON pointers excluded from diff comparison.",
+                    "items": {
+                      "minLength": 1,
+                      "type": "string"
+                    },
+                    "type": "array"
+                  },
+                  "kind": {
+                    "description": "Kind of the resource to ignore.",
+                    "minLength": 1,
+                    "type": "string"
+                  },
+                  "managedFieldsManagers": {
+                    "description": "Field manager names excluded from diff comparison.",
+                    "items": {
+                      "minLength": 1,
+                      "type": "string"
+                    },
+                    "type": "array"
+                  },
+                  "name": {
+                    "description": "Specific resource name to scope the diff exception.",
+                    "minLength": 1,
+                    "type": "string"
+                  },
+                  "namespace": {
+                    "description": "Namespace scoping the diff exception.",
+                    "minLength": 1,
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "kind"
+                ],
+                "type": "object"
+              },
+              "type": "array"
+            },
+            "project": {
+              "description": "Target Argo CD AppProject (inherits global.defaultProject when omitted).",
+              "minLength": 1,
+              "type": "string"
+            },
+            "syncPolicy": {
+              "additionalProperties": false,
+              "description": "SyncPolicy override merged deterministically with global.defaults.syncPolicy.",
+              "properties": {
+                "automated": {
+                  "additionalProperties": false,
+                  "description": "Automated sync and drift-remediation settings.",
+                  "properties": {
+                    "allowEmpty": {
+                      "description": "Allows syncing Applications that render zero resources.",
+                      "type": "boolean"
+                    },
+                    "prune": {
+                      "description": "Deletes resources removed from Git during sync.",
+                      "type": "boolean"
+                    },
+                    "selfHeal": {
+                      "description": "Reverts out-of-band manual cluster changes automatically.",
+                      "type": "boolean"
+                    }
+                  },
+                  "type": "object"
+                },
+                "retry": {
+                  "additionalProperties": false,
+                  "description": "Retry limits and exponential backoff settings on sync failures.",
+                  "properties": {
+                    "backoff": {
+                      "additionalProperties": false,
+                      "description": "Exponential backoff timing between sync retries.",
+                      "properties": {
+                        "duration": {
+                          "description": "Initial backoff duration (for example 5s).",
+                          "minLength": 1,
+                          "type": "string"
+                        },
+                        "factor": {
+                          "description": "Backoff multiplier factor on consecutive retries.",
+                          "maximum": 10,
+                          "minimum": 1,
+                          "type": "integer"
+                        },
+                        "maxDuration": {
+                          "description": "Maximum backoff cap between retries (for example 3m).",
+                          "minLength": 1,
+                          "type": "string"
+                        }
+                      },
+                      "type": "object"
+                    },
+                    "limit": {
+                      "description": "Maximum sync retry attempts (-1 for unlimited).",
+                      "maximum": 100,
+                      "minimum": -1,
+                      "type": "integer"
+                    }
+                  },
+                  "type": "object"
+                },
+                "syncOptions": {
+                  "description": "Sync options merged as a deduplicated union across global and tenant scopes.",
+                  "items": {
+                    "minLength": 1,
+                    "type": "string"
+                  },
+                  "type": "array"
+                }
+              },
+              "type": "object"
+            },
+            "targetSourceOverride": {
+              "additionalProperties": false,
+              "description": "Helm chart coordinate and tenant valueFiles overrides.",
+              "properties": {
+                "chart": {
+                  "description": "Override Helm chart name.",
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "helm": {
+                  "additionalProperties": false,
+                  "description": "Tenant-specific Helm valueFiles appended after global defaults.",
+                  "properties": {
+                    "valueFiles": {
+                      "description": "Ordered tenant value files prefixed with $values/.",
+                      "items": {
+                        "minLength": 1,
+                        "type": "string"
+                      },
+                      "type": "array"
+                    }
+                  },
+                  "type": "object"
+                },
+                "repoURL": {
+                  "description": "Override Helm or OCI chart repository URL.",
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "targetRevision": {
+                  "description": "Override Helm chart version or OCI tag.",
+                  "minLength": 1,
+                  "type": "string"
+                }
+              },
+              "type": "object"
+            }
+          },
+          "required": [
+            "enabled",
+            "generators"
+          ],
+          "type": "object"
+        }
+      },
+      "type": "object"
+    },
+    "appsetsKustomize": {
+      "additionalProperties": false,
+      "description": "Kustomize ApplicationSets supporting overlays, components, and patches.",
+      "patternProperties": {
+        "^[a-z0-9]([-a-z0-9]*[a-z0-9])?$": {
+          "additionalProperties": false,
+          "properties": {
+            "applicationAnnotations": {
+              "additionalProperties": false,
+              "description": "Annotations merged onto Applications produced by this ApplicationSet.",
+              "patternProperties": {
+                "^([a-z0-9]([-a-z0-9.]*[a-z0-9])?/)?[a-zA-Z0-9]([a-zA-Z0-9._-]*[a-zA-Z0-9])?$": {
+                  "type": "string"
+                }
+              },
+              "type": "object"
+            },
+            "applicationLabels": {
+              "additionalProperties": false,
+              "description": "Labels merged onto Applications produced by this ApplicationSet.",
+              "patternProperties": {
+                "^([a-z0-9]([-a-z0-9.]*[a-z0-9])?/)?[a-zA-Z0-9]([a-zA-Z0-9._-]*[a-zA-Z0-9])?$": {
+                  "type": "string"
+                }
+              },
+              "type": "object"
+            },
+            "applicationNameTemplate": {
+              "default": "{{ .metadata.labels.environment }}-{{ .path.basename }}",
+              "description": "Go template string used for generated Application metadata.name.",
+              "minLength": 1,
+              "type": "string"
+            },
+            "destination": {
+              "additionalProperties": false,
+              "description": "Target cluster and namespace override for generated Applications.",
+              "not": {
+                "required": [
+                  "name",
+                  "server"
+                ]
+              },
+              "properties": {
+                "name": {
+                  "description": "Target cluster logical name or Go template (mutually exclusive with server).",
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "namespace": {
+                  "description": "Target namespace or Go template in the destination cluster.",
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "server": {
+                  "description": "Target cluster API server URL or Go template (mutually exclusive with name).",
+                  "minLength": 1,
+                  "type": "string"
+                }
+              },
+              "type": "object"
+            },
+            "enabled": {
+              "default": true,
+              "description": "Enables or disables rendering this ApplicationSet.",
+              "type": "boolean"
+            },
+            "generators": {
+              "additionalProperties": false,
+              "description": "Matrix generator pairing clusters and Git directory or file discovery.",
+              "properties": {
+                "matrix": {
+                  "additionalProperties": false,
+                  "description": "Matrix generator combining cluster selection and Git directory or file discovery.",
+                  "properties": {
+                    "clusters": {
+                      "additionalProperties": false,
+                      "anyOf": [
+                        {
+                          "required": [
+                            "matchLabels"
+                          ]
+                        },
+                        {
+                          "required": [
+                            "matchExpressions"
+                          ]
+                        }
+                      ],
+                      "description": "Non-empty cluster selector for matrix targeting.",
+                      "properties": {
+                        "matchExpressions": {
+                          "description": "Set-based cluster label selector expressions.",
+                          "items": {
+                            "additionalProperties": false,
+                            "properties": {
+                              "key": {
+                                "description": "Cluster label key to evaluate.",
+                                "minLength": 1,
+                                "type": "string"
+                              },
+                              "operator": {
+                                "description": "Label matching operator (In, NotIn, Exists, or DoesNotExist).",
+                                "enum": [
+                                  "In",
+                                  "NotIn",
+                                  "Exists",
+                                  "DoesNotExist"
+                                ],
+                                "type": "string"
+                              },
+                              "values": {
+                                "description": "Allowed values for In or NotIn operators.",
+                                "items": {
+                                  "minLength": 1,
+                                  "type": "string"
+                                },
+                                "type": "array"
+                              }
+                            },
+                            "required": [
+                              "key",
+                              "operator"
+                            ],
+                            "type": "object"
+                          },
+                          "minItems": 1,
+                          "type": "array"
+                        },
+                        "matchLabels": {
+                          "additionalProperties": false,
+                          "description": "Exact cluster label key-value pairs required to match target clusters.",
+                          "minProperties": 1,
+                          "patternProperties": {
+                            "^([a-z0-9]([-a-z0-9.]*[a-z0-9])?/)?[a-zA-Z0-9]([a-zA-Z0-9._-]*[a-zA-Z0-9])?$": {
+                              "type": "string"
+                            }
+                          },
+                          "type": "object"
+                        }
+                      },
+                      "type": "object"
+                    },
+                    "git": {
+                      "additionalProperties": false,
+                      "anyOf": [
+                        {
+                          "required": [
+                            "directories"
+                          ]
+                        },
+                        {
+                          "required": [
+                            "files"
+                          ]
+                        }
+                      ],
+                      "description": "Git directory or file discovery source.",
+                      "properties": {
+                        "directories": {
+                          "description": "Directory glob patterns discovered by the Git generator.",
+                          "items": {
+                            "minLength": 1,
+                            "type": "string"
+                          },
+                          "minItems": 1,
+                          "type": "array"
+                        },
+                        "files": {
+                          "description": "File glob patterns discovered by the Git generator.",
+                          "items": {
+                            "minLength": 1,
+                            "pattern": "^([^*]|\\*[^*])*\\*?$",
+                            "type": "string"
+                          },
+                          "minItems": 1,
+                          "type": "array"
+                        },
+                        "pathParamPrefix": {
+                          "description": "Optional prefix applied to generated path parameters.",
+                          "minLength": 1,
+                          "type": "string"
+                        },
+                        "repoURL": {
+                          "description": "Git repository URL hosting Kustomize manifests and overlays.",
+                          "minLength": 1,
+                          "type": "string"
+                        },
+                        "requeueAfterSeconds": {
+                          "description": "Git generator polling interval in seconds.",
+                          "maximum": 86400,
+                          "minimum": 10,
+                          "type": "integer"
+                        },
+                        "targetRevision": {
+                          "description": "Git branch, tag, or commit revision to track.",
+                          "minLength": 1,
+                          "type": "string"
+                        },
+                        "values": {
+                          "additionalProperties": false,
+                          "description": "Static key-value parameters exposed to the ApplicationSet template.",
+                          "patternProperties": {
+                            "^[a-zA-Z0-9._-]+$": {
+                              "type": "string"
+                            }
+                          },
+                          "type": "object"
+                        }
+                      },
+                      "required": [
+                        "repoURL",
+                        "targetRevision"
+                      ],
+                      "type": "object"
+                    }
+                  },
+                  "required": [
+                    "clusters",
+                    "git"
+                  ],
+                  "type": "object"
+                }
+              },
+              "required": [
+                "matrix"
+              ],
+              "type": "object"
+            },
+            "ignoreDifferences": {
+              "description": "Additional ignoreDifferences rules appended after global rules.",
+              "items": {
+                "additionalProperties": false,
+                "properties": {
+                  "group": {
+                    "description": "API group of the resource to ignore.",
+                    "type": "string"
+                  },
+                  "jqPathExpressions": {
+                    "description": "jq expressions excluded from diff comparison.",
+                    "items": {
+                      "minLength": 1,
+                      "type": "string"
+                    },
+                    "type": "array"
+                  },
+                  "jsonPointers": {
+                    "description": "RFC 6901 JSON pointers excluded from diff comparison.",
+                    "items": {
+                      "minLength": 1,
+                      "type": "string"
+                    },
+                    "type": "array"
+                  },
+                  "kind": {
+                    "description": "Kind of the resource to ignore.",
+                    "minLength": 1,
+                    "type": "string"
+                  },
+                  "managedFieldsManagers": {
+                    "description": "Field manager names excluded from diff comparison.",
+                    "items": {
+                      "minLength": 1,
+                      "type": "string"
+                    },
+                    "type": "array"
+                  },
+                  "name": {
+                    "description": "Specific resource name to scope the diff exception.",
+                    "minLength": 1,
+                    "type": "string"
+                  },
+                  "namespace": {
+                    "description": "Namespace scoping the diff exception.",
+                    "minLength": 1,
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "kind"
+                ],
+                "type": "object"
+              },
+              "type": "array"
+            },
+            "project": {
+              "description": "Target Argo CD AppProject (inherits global.defaultProject when omitted).",
+              "minLength": 1,
+              "type": "string"
+            },
+            "syncPolicy": {
+              "additionalProperties": false,
+              "description": "SyncPolicy override merged deterministically with global.defaults.syncPolicy.",
+              "properties": {
+                "automated": {
+                  "additionalProperties": false,
+                  "description": "Automated sync and drift-remediation settings.",
+                  "properties": {
+                    "allowEmpty": {
+                      "description": "Allows syncing Applications that render zero resources.",
+                      "type": "boolean"
+                    },
+                    "prune": {
+                      "description": "Deletes resources removed from Git during sync.",
+                      "type": "boolean"
+                    },
+                    "selfHeal": {
+                      "description": "Reverts out-of-band manual cluster changes automatically.",
+                      "type": "boolean"
+                    }
+                  },
+                  "type": "object"
+                },
+                "retry": {
+                  "additionalProperties": false,
+                  "description": "Retry limits and exponential backoff settings on sync failures.",
+                  "properties": {
+                    "backoff": {
+                      "additionalProperties": false,
+                      "description": "Exponential backoff timing between sync retries.",
+                      "properties": {
+                        "duration": {
+                          "description": "Initial backoff duration (for example 5s).",
+                          "minLength": 1,
+                          "type": "string"
+                        },
+                        "factor": {
+                          "description": "Backoff multiplier factor on consecutive retries.",
+                          "maximum": 10,
+                          "minimum": 1,
+                          "type": "integer"
+                        },
+                        "maxDuration": {
+                          "description": "Maximum backoff cap between retries (for example 3m).",
+                          "minLength": 1,
+                          "type": "string"
+                        }
+                      },
+                      "type": "object"
+                    },
+                    "limit": {
+                      "description": "Maximum sync retry attempts (-1 for unlimited).",
+                      "maximum": 100,
+                      "minimum": -1,
+                      "type": "integer"
+                    }
+                  },
+                  "type": "object"
+                },
+                "syncOptions": {
+                  "description": "Sync options merged as a deduplicated union across global and tenant scopes.",
+                  "items": {
+                    "minLength": 1,
+                    "type": "string"
+                  },
+                  "type": "array"
+                }
+              },
+              "type": "object"
+            },
+            "targetSourceOverride": {
+              "additionalProperties": false,
+              "description": "Kustomize repository, path, and build option overrides.",
+              "properties": {
+                "kustomize": {
+                  "additionalProperties": false,
+                  "description": "Kustomize build options merged over global.defaults.kustomize.",
+                  "properties": {
+                    "commonAnnotations": {
+                      "additionalProperties": false,
+                      "description": "Tenant commonAnnotations merged over global commonAnnotations.",
+                      "patternProperties": {
+                        "^([a-z0-9]([-a-z0-9.]*[a-z0-9])?/)?[a-zA-Z0-9]([a-zA-Z0-9._-]*[a-zA-Z0-9])?$": {
+                          "type": "string"
+                        }
+                      },
+                      "type": "object"
+                    },
+                    "commonLabels": {
+                      "additionalProperties": false,
+                      "description": "Tenant commonLabels merged over global commonLabels.",
+                      "patternProperties": {
+                        "^([a-z0-9]([-a-z0-9.]*[a-z0-9])?/)?[a-zA-Z0-9]([a-zA-Z0-9._-]*[a-zA-Z0-9])?$": {
+                          "type": "string"
+                        }
+                      },
+                      "type": "object"
+                    },
+                    "components": {
+                      "description": "Tenant Kustomize components appended after global components.",
+                      "items": {
+                        "minLength": 1,
+                        "type": "string"
+                      },
+                      "type": "array"
+                    },
+                    "images": {
+                      "description": "Tenant Kustomize images appended after global images.",
+                      "items": {
+                        "minLength": 1,
+                        "type": "string"
+                      },
+                      "type": "array"
+                    },
+                    "namePrefix": {
+                      "description": "Override Kustomize namePrefix.",
+                      "minLength": 1,
+                      "type": "string"
+                    },
+                    "nameSuffix": {
+                      "description": "Override Kustomize nameSuffix.",
+                      "minLength": 1,
+                      "type": "string"
+                    },
+                    "namespace": {
+                      "description": "Override Kustomize namespace.",
+                      "minLength": 1,
+                      "type": "string"
+                    },
+                    "patches": {
+                      "description": "Tenant Kustomize patches appended after global patches.",
+                      "items": {
+                        "additionalProperties": false,
+                        "anyOf": [
+                          {
+                            "required": [
+                              "patch"
+                            ]
+                          },
+                          {
+                            "required": [
+                              "path"
+                            ]
+                          }
+                        ],
+                        "properties": {
+                          "options": {
+                            "additionalProperties": false,
+                            "description": "Boolean options passed to Kustomize patch processing.",
+                            "patternProperties": {
+                              "^[a-zA-Z0-9._-]+$": {
+                                "type": "boolean"
+                              }
+                            },
+                            "type": "object"
+                          },
+                          "patch": {
+                            "description": "Inline strategic-merge or JSON 6902 patch document.",
+                            "minLength": 1,
+                            "type": "string"
+                          },
+                          "path": {
+                            "description": "Relative path to a patch file inside the Git source.",
+                            "minLength": 1,
+                            "type": "string"
+                          },
+                          "target": {
+                            "additionalProperties": false,
+                            "description": "Target Kubernetes resource selector for the patch.",
+                            "properties": {
+                              "annotationSelector": {
+                                "description": "Annotation selector matching target resources.",
+                                "minLength": 1,
+                                "type": "string"
+                              },
+                              "group": {
+                                "description": "Target API group (empty string for core resources).",
+                                "type": "string"
+                              },
+                              "kind": {
+                                "description": "Target Kubernetes resource kind.",
+                                "minLength": 1,
+                                "type": "string"
+                              },
+                              "labelSelector": {
+                                "description": "Label selector matching target resources.",
+                                "minLength": 1,
+                                "type": "string"
+                              },
+                              "name": {
+                                "description": "Target resource name.",
+                                "minLength": 1,
+                                "type": "string"
+                              },
+                              "namespace": {
+                                "description": "Target resource namespace.",
+                                "minLength": 1,
+                                "type": "string"
+                              },
+                              "version": {
+                                "description": "Target API version.",
+                                "minLength": 1,
+                                "type": "string"
+                              }
+                            },
+                            "type": "object"
+                          }
+                        },
+                        "type": "object"
+                      },
+                      "type": "array"
+                    }
+                  },
+                  "type": "object"
+                },
+                "path": {
+                  "description": "Override path or Go template inside the Git source.",
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "repoURL": {
+                  "description": "Override Git repository URL for Kustomize source.",
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "targetRevision": {
+                  "description": "Override Git revision for Kustomize source.",
+                  "minLength": 1,
+                  "type": "string"
+                }
+              },
+              "type": "object"
+            }
+          },
+          "required": [
+            "enabled",
+            "generators"
+          ],
+          "type": "object"
+        }
+      },
+      "type": "object"
+    },
+    "global": {
+      "additionalProperties": false,
+      "description": "Global defaults and governance settings inherited across all AppProjects and ApplicationSets.",
+      "properties": {
+        "allowDefaultProject": {
+          "default": false,
+          "description": "Explicitly allows using the unrestricted Argo CD 'default' project.",
+          "type": "boolean"
+        },
+        "applicationAnnotations": {
+          "additionalProperties": false,
+          "description": "Global annotations merged onto every generated Application.",
+          "patternProperties": {
+            "^([a-z0-9]([-a-z0-9.]*[a-z0-9])?/)?[a-zA-Z0-9]([a-zA-Z0-9._-]*[a-zA-Z0-9])?$": {
+              "type": "string"
+            }
+          },
+          "type": "object"
+        },
+        "applicationLabels": {
+          "additionalProperties": false,
+          "description": "Global labels merged onto every generated Application.",
+          "patternProperties": {
+            "^([a-z0-9]([-a-z0-9.]*[a-z0-9])?/)?[a-zA-Z0-9]([a-zA-Z0-9._-]*[a-zA-Z0-9])?$": {
+              "type": "string"
+            }
+          },
+          "type": "object"
+        },
+        "argoNamespace": {
+          "default": "argocd",
+          "description": "Namespace where the Argo CD controller runs.",
+          "minLength": 1,
+          "type": "string"
+        },
+        "defaultProject": {
+          "default": "platform-apps",
+          "description": "Default Argo CD AppProject inherited when an ApplicationSet omits project.",
+          "minLength": 1,
+          "type": "string"
+        },
+        "defaults": {
+          "additionalProperties": false,
+          "description": "Shared source, syncPolicy, and ignoreDifferences defaults.",
+          "properties": {
+            "helm": {
+              "additionalProperties": false,
+              "description": "Flat global defaults for multi-source Helm workloads.",
+              "properties": {
+                "chart": {
+                  "description": "Default Helm chart name.",
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "repoURL": {
+                  "description": "Default Helm or OCI chart repository URL.",
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "targetRevision": {
+                  "description": "Default Helm chart version or OCI tag.",
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "valueFiles": {
+                  "description": "Ordered global value files prefixed with $values/ before tenant overrides.",
+                  "items": {
+                    "minLength": 1,
+                    "type": "string"
+                  },
+                  "type": "array"
+                }
+              },
+              "type": "object"
+            },
+            "ignoreDifferences": {
+              "description": "Global ignoreDifferences rules inherited by all Applications.",
+              "items": {
+                "additionalProperties": false,
+                "properties": {
+                  "group": {
+                    "description": "API group of the resource to ignore.",
+                    "type": "string"
+                  },
+                  "jqPathExpressions": {
+                    "description": "jq expressions excluded from diff comparison.",
+                    "items": {
+                      "minLength": 1,
+                      "type": "string"
+                    },
+                    "type": "array"
+                  },
+                  "jsonPointers": {
+                    "description": "RFC 6901 JSON pointers excluded from diff comparison.",
+                    "items": {
+                      "minLength": 1,
+                      "type": "string"
+                    },
+                    "type": "array"
+                  },
+                  "kind": {
+                    "description": "Kind of the resource to ignore.",
+                    "minLength": 1,
+                    "type": "string"
+                  },
+                  "managedFieldsManagers": {
+                    "description": "Field manager names excluded from diff comparison.",
+                    "items": {
+                      "minLength": 1,
+                      "type": "string"
+                    },
+                    "type": "array"
+                  },
+                  "name": {
+                    "description": "Specific resource name to scope the diff exception.",
+                    "minLength": 1,
+                    "type": "string"
+                  },
+                  "namespace": {
+                    "description": "Namespace scoping the diff exception.",
+                    "minLength": 1,
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "kind"
+                ],
+                "type": "object"
+              },
+              "type": "array"
+            },
+            "kustomize": {
+              "additionalProperties": false,
+              "description": "Flat global defaults for Kustomize sources and build options.",
+              "properties": {
+                "commonAnnotations": {
+                  "additionalProperties": false,
+                  "description": "Global commonAnnotations merged into Kustomize build options.",
+                  "patternProperties": {
+                    "^([a-z0-9]([-a-z0-9.]*[a-z0-9])?/)?[a-zA-Z0-9]([a-zA-Z0-9._-]*[a-zA-Z0-9])?$": {
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                },
+                "commonLabels": {
+                  "additionalProperties": false,
+                  "description": "Global commonLabels merged into Kustomize build options.",
+                  "patternProperties": {
+                    "^([a-z0-9]([-a-z0-9.]*[a-z0-9])?/)?[a-zA-Z0-9]([a-zA-Z0-9._-]*[a-zA-Z0-9])?$": {
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                },
+                "components": {
+                  "description": "Global Kustomize components prepended before tenant components.",
+                  "items": {
+                    "minLength": 1,
+                    "type": "string"
+                  },
+                  "type": "array"
+                },
+                "images": {
+                  "description": "Global Kustomize image overrides prepended before tenant images.",
+                  "items": {
+                    "minLength": 1,
+                    "type": "string"
+                  },
+                  "type": "array"
+                },
+                "namePrefix": {
+                  "description": "Global namePrefix applied to Kustomize resources.",
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "nameSuffix": {
+                  "description": "Global nameSuffix applied to Kustomize resources.",
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "namespace": {
+                  "description": "Global namespace override enforced by Kustomize.",
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "patches": {
+                  "description": "Global Kustomize patches prepended before tenant patches.",
+                  "items": {
+                    "additionalProperties": false,
+                    "anyOf": [
+                      {
+                        "required": [
+                          "patch"
+                        ]
+                      },
+                      {
+                        "required": [
+                          "path"
+                        ]
+                      }
+                    ],
+                    "properties": {
+                      "options": {
+                        "additionalProperties": false,
+                        "description": "Boolean options passed to Kustomize patch processing.",
+                        "patternProperties": {
+                          "^[a-zA-Z0-9._-]+$": {
+                            "type": "boolean"
+                          }
+                        },
+                        "type": "object"
+                      },
+                      "patch": {
+                        "description": "Inline strategic-merge or JSON 6902 patch document.",
+                        "minLength": 1,
+                        "type": "string"
+                      },
+                      "path": {
+                        "description": "Relative path to a patch file inside the Git source.",
+                        "minLength": 1,
+                        "type": "string"
+                      },
+                      "target": {
+                        "additionalProperties": false,
+                        "description": "Target Kubernetes resource selector for the patch.",
+                        "properties": {
+                          "annotationSelector": {
+                            "description": "Annotation selector matching target resources.",
+                            "minLength": 1,
+                            "type": "string"
+                          },
+                          "group": {
+                            "description": "Target API group (empty string for core resources).",
+                            "type": "string"
+                          },
+                          "kind": {
+                            "description": "Target Kubernetes resource kind.",
+                            "minLength": 1,
+                            "type": "string"
+                          },
+                          "labelSelector": {
+                            "description": "Label selector matching target resources.",
+                            "minLength": 1,
+                            "type": "string"
+                          },
+                          "name": {
+                            "description": "Target resource name.",
+                            "minLength": 1,
+                            "type": "string"
+                          },
+                          "namespace": {
+                            "description": "Target resource namespace.",
+                            "minLength": 1,
+                            "type": "string"
+                          },
+                          "version": {
+                            "description": "Target API version.",
+                            "minLength": 1,
+                            "type": "string"
+                          }
+                        },
+                        "type": "object"
+                      }
+                    },
+                    "type": "object"
+                  },
+                  "type": "array"
+                },
+                "path": {
+                  "description": "Default repository path or Go template expression for Kustomize.",
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "repoURL": {
+                  "description": "Default Git repository URL for Kustomize manifests.",
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "targetRevision": {
+                  "description": "Default Git branch, tag, or commit for Kustomize.",
+                  "minLength": 1,
+                  "type": "string"
+                }
+              },
+              "type": "object"
+            },
+            "syncPolicy": {
+              "additionalProperties": false,
+              "description": "Baseline syncPolicy merged deterministically with each ApplicationSet override.",
+              "properties": {
+                "automated": {
+                  "additionalProperties": false,
+                  "description": "Automated sync and drift-remediation settings.",
+                  "properties": {
+                    "allowEmpty": {
+                      "description": "Allows syncing Applications that render zero resources.",
+                      "type": "boolean"
+                    },
+                    "prune": {
+                      "description": "Deletes resources removed from Git during sync.",
+                      "type": "boolean"
+                    },
+                    "selfHeal": {
+                      "description": "Reverts out-of-band manual cluster changes automatically.",
+                      "type": "boolean"
+                    }
+                  },
+                  "type": "object"
+                },
+                "retry": {
+                  "additionalProperties": false,
+                  "description": "Retry limits and exponential backoff settings on sync failures.",
+                  "properties": {
+                    "backoff": {
+                      "additionalProperties": false,
+                      "description": "Exponential backoff timing between sync retries.",
+                      "properties": {
+                        "duration": {
+                          "description": "Initial backoff duration (for example 5s).",
+                          "minLength": 1,
+                          "type": "string"
+                        },
+                        "factor": {
+                          "description": "Backoff multiplier factor on consecutive retries.",
+                          "maximum": 10,
+                          "minimum": 1,
+                          "type": "integer"
+                        },
+                        "maxDuration": {
+                          "description": "Maximum backoff cap between retries (for example 3m).",
+                          "minLength": 1,
+                          "type": "string"
+                        }
+                      },
+                      "type": "object"
+                    },
+                    "limit": {
+                      "description": "Maximum sync retry attempts (-1 for unlimited).",
+                      "maximum": 100,
+                      "minimum": -1,
+                      "type": "integer"
+                    }
+                  },
+                  "type": "object"
+                },
+                "syncOptions": {
+                  "description": "Sync options merged as a deduplicated union across global and tenant scopes.",
+                  "items": {
+                    "minLength": 1,
+                    "type": "string"
+                  },
+                  "type": "array"
+                }
+              },
+              "type": "object"
+            }
+          },
+          "type": "object"
+        },
+        "finalizers": {
+          "description": "Kubernetes finalizers applied to metadata.finalizers on generated Applications.",
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "revisionHistoryLimit": {
+          "default": 3,
+          "description": "Number of revision history entries retained per generated Application.",
+          "maximum": 20,
+          "minimum": 1,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "defaultProject",
+        "defaults"
+      ],
+      "type": "object"
+    }
+  },
+  "required": [
+    "global"
+  ],
+  "title": "ArgoCD GitOps Platform Values Schema",
+  "type": "object"
+}

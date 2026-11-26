@@ -1,0 +1,153 @@
+{{- $root := . -}}
+{{- $global := .Values.global -}}
+{{- $globalDefaults := default dict $global.defaults -}}
+{{- $globalK := default dict $globalDefaults.kustomize -}}
+{{- if .Values.appsetsKustomize -}}
+{{- range $appName := (keys .Values.appsetsKustomize | sortAlpha) -}}
+{{- $appConfig := index $root.Values.appsetsKustomize $appName -}}
+{{- if eq (default false $appConfig.enabled) true }}
+{{- $project := default $global.defaultProject $appConfig.project -}}
+{{- include "argocd-gitops-platform.assertProjectPolicy" (dict "global" $global "project" $project "context" (printf "appsetsKustomize.%s" $appName)) -}}
+{{- $dest := default dict $appConfig.destination -}}
+{{- include "argocd-gitops-platform.assertDestination" (dict "dest" $dest "context" (printf "appsetsKustomize.%s" $appName)) -}}
+{{- $override := default dict $appConfig.targetSourceOverride -}}
+{{- $tenantK := default dict $override.kustomize -}}
+{{- $git := $appConfig.generators.matrix.git -}}
+{{- $repoURL := default (default $git.repoURL $globalK.repoURL) $override.repoURL -}}
+{{- $targetRevision := default (default $git.targetRevision $globalK.targetRevision) $override.targetRevision -}}
+{{- $sourcePath := default (default "{{ .path.path }}" $globalK.path) $override.path -}}
+{{- $namePrefix := default $globalK.namePrefix $tenantK.namePrefix -}}
+{{- $nameSuffix := default $globalK.nameSuffix $tenantK.nameSuffix -}}
+{{- $kNamespace := default $globalK.namespace $tenantK.namespace -}}
+{{- $commonLabels := mergeOverwrite (deepCopy (default dict $globalK.commonLabels)) (deepCopy (default dict $tenantK.commonLabels)) -}}
+{{- $commonAnnotations := mergeOverwrite (deepCopy (default dict $globalK.commonAnnotations)) (deepCopy (default dict $tenantK.commonAnnotations)) -}}
+{{- $images := concat (default list $globalK.images) (default list $tenantK.images) -}}
+{{- $components := concat (default list $globalK.components) (default list $tenantK.components) -}}
+{{- $patches := concat (default list $globalK.patches) (default list $tenantK.patches) -}}
+{{- $hasKustomizeBlock := or $namePrefix $nameSuffix $kNamespace (gt (len $commonLabels) 0) (gt (len $commonAnnotations) 0) (gt (len $images) 0) (gt (len $components) 0) (gt (len $patches) 0) -}}
+{{- $labels := mergeOverwrite (deepCopy (default dict $global.applicationLabels)) (deepCopy (default dict $appConfig.applicationLabels)) -}}
+{{- $annotations := mergeOverwrite (deepCopy (default dict $global.applicationAnnotations)) (deepCopy (default dict $appConfig.applicationAnnotations)) -}}
+{{- $mergedSync := include "argocd-gitops-platform.mergeSyncPolicy" (dict "global" $globalDefaults.syncPolicy "tenant" $appConfig.syncPolicy) -}}
+{{- $ignoreDiff := concat (default list $globalDefaults.ignoreDifferences) (default list $appConfig.ignoreDifferences) -}}
+---
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: {{ $appName | quote }}
+  namespace: {{ default "argocd" $global.argoNamespace | quote }}
+  labels:
+    {{- include "argocd-gitops-platform.labels" $root | nindent 4 }}
+spec:
+  goTemplate: true
+  goTemplateOptions:
+    - "missingkey=error"
+  generators:
+    - matrix:
+        generators:
+          - clusters:
+              selector:
+                {{- toYaml $appConfig.generators.matrix.clusters | nindent 16 }}
+          - git:
+              repoURL: {{ $git.repoURL | quote }}
+              revision: {{ $git.targetRevision | quote }}
+              {{- if hasKey $git "requeueAfterSeconds" }}
+              requeueAfterSeconds: {{ $git.requeueAfterSeconds }}
+              {{- end }}
+              {{- if $git.pathParamPrefix }}
+              pathParamPrefix: {{ $git.pathParamPrefix | quote }}
+              {{- end }}
+              {{- if $git.values }}
+              values:
+                {{- toYaml $git.values | nindent 16 }}
+              {{- end }}
+              {{- if $git.directories }}
+              directories:
+                {{- range $dir := $git.directories }}
+                - path: {{ $dir | quote }}
+                {{- end }}
+              {{- end }}
+              {{- if $git.files }}
+              files:
+                {{- range $file := $git.files }}
+                - path: {{ $file | quote }}
+                {{- end }}
+              {{- end }}
+  template:
+    metadata:
+      name: {{ default "{{ .metadata.labels.environment }}-{{ .path.basename }}" $appConfig.applicationNameTemplate | quote }}
+      {{- if $global.finalizers }}
+      finalizers:
+        {{- toYaml $global.finalizers | nindent 8 }}
+      {{- end }}
+      labels:
+        environment: {{ "{{ .metadata.labels.environment }}" | quote }}
+        {{- if gt (len $labels) 0 }}
+        {{- toYaml $labels | nindent 8 }}
+        {{- end }}
+      {{- if gt (len $annotations) 0 }}
+      annotations:
+        {{- toYaml $annotations | nindent 8 }}
+      {{- end }}
+    spec:
+      project: {{ $project | quote }}
+      {{- if hasKey $global "revisionHistoryLimit" }}
+      revisionHistoryLimit: {{ $global.revisionHistoryLimit }}
+      {{- end }}
+      source:
+        repoURL: {{ $repoURL | quote }}
+        targetRevision: {{ $targetRevision | quote }}
+        path: {{ $sourcePath | quote }}
+        {{- if $hasKustomizeBlock }}
+        kustomize:
+          {{- if $namePrefix }}
+          namePrefix: {{ $namePrefix | quote }}
+          {{- end }}
+          {{- if $nameSuffix }}
+          nameSuffix: {{ $nameSuffix | quote }}
+          {{- end }}
+          {{- if $kNamespace }}
+          namespace: {{ $kNamespace | quote }}
+          {{- end }}
+          {{- if gt (len $commonLabels) 0 }}
+          commonLabels:
+            {{- toYaml $commonLabels | nindent 12 }}
+          {{- end }}
+          {{- if gt (len $commonAnnotations) 0 }}
+          commonAnnotations:
+            {{- toYaml $commonAnnotations | nindent 12 }}
+          {{- end }}
+          {{- if gt (len $images) 0 }}
+          images:
+            {{- range $img := $images }}
+            - {{ $img | quote }}
+            {{- end }}
+          {{- end }}
+          {{- if gt (len $components) 0 }}
+          components:
+            {{- range $comp := $components }}
+            - {{ $comp | quote }}
+            {{- end }}
+          {{- end }}
+          {{- if gt (len $patches) 0 }}
+          patches:
+            {{- toYaml $patches | nindent 12 }}
+          {{- end }}
+        {{- end }}
+      destination:
+        {{- if $dest.name }}
+        name: {{ $dest.name | quote }}
+        {{- else }}
+        server: {{ default "{{ .server }}" $dest.server | quote }}
+        {{- end }}
+        namespace: {{ default "{{ .metadata.labels.environment }}" $dest.namespace | quote }}
+      {{- if $mergedSync }}
+      syncPolicy:
+        {{- $mergedSync | nindent 8 }}
+      {{- end }}
+      {{- if gt (len $ignoreDiff) 0 }}
+      ignoreDifferences:
+        {{- toYaml $ignoreDiff | nindent 8 }}
+      {{- end }}
+{{- end }}
+{{- end -}}
+{{- end -}}

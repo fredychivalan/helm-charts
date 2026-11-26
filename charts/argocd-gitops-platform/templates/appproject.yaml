@@ -1,0 +1,65 @@
+{{- $root := . -}}
+{{- $global := .Values.global -}}
+{{- if .Values.appProjects -}}
+{{- range $projName := (keys .Values.appProjects | sortAlpha) -}}
+{{- $proj := index $root.Values.appProjects $projName -}}
+{{- if eq (default true $proj.enabled) true }}
+{{- $hasWildcardRepo := has "*" (default list $proj.sourceRepos) -}}
+{{- range $dest := (default list $proj.destinations) -}}
+  {{- include "argocd-gitops-platform.assertDestination" (dict "dest" $dest "context" (printf "appProjects.%s" $projName)) -}}
+  {{- $wildcardCluster := or (eq (default "" $dest.server) "*") (eq (default "" $dest.name) "*") -}}
+  {{- $wildcardNS := eq (default "" $dest.namespace) "*" -}}
+  {{- if and $hasWildcardRepo $wildcardCluster $wildcardNS -}}
+    {{- fail (printf "security policy violation in appProjects.%s: simultaneous wildcard sourceRepos=['*'] and wildcard destination (cluster='*', namespace='*') is forbidden" $projName) -}}
+  {{- end -}}
+{{- end }}
+---
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: {{ $projName | quote }}
+  namespace: {{ default "argocd" $global.argoNamespace | quote }}
+  labels:
+    {{- include "argocd-gitops-platform.labels" $root | nindent 4 }}
+    {{- if $proj.labels }}
+    {{- toYaml $proj.labels | nindent 4 }}
+    {{- end }}
+  {{- if $proj.annotations }}
+  annotations:
+    {{- toYaml $proj.annotations | nindent 4 }}
+  {{- end }}
+spec:
+  {{- if $proj.description }}
+  description: {{ $proj.description | quote }}
+  {{- end }}
+  sourceRepos:
+    {{- toYaml $proj.sourceRepos | nindent 4 }}
+  destinations:
+    {{- toYaml $proj.destinations | nindent 4 }}
+  {{- if $proj.clusterResourceWhitelist }}
+  clusterResourceWhitelist:
+    {{- toYaml $proj.clusterResourceWhitelist | nindent 4 }}
+  {{- end }}
+  {{- if $proj.clusterResourceBlacklist }}
+  clusterResourceBlacklist:
+    {{- toYaml $proj.clusterResourceBlacklist | nindent 4 }}
+  {{- end }}
+  {{- if $proj.namespaceResourceWhitelist }}
+  namespaceResourceWhitelist:
+    {{- toYaml $proj.namespaceResourceWhitelist | nindent 4 }}
+  {{- end }}
+  {{- if $proj.namespaceResourceBlacklist }}
+  namespaceResourceBlacklist:
+    {{- toYaml $proj.namespaceResourceBlacklist | nindent 4 }}
+  {{- end }}
+  {{- if $proj.sourceNamespaces }}
+  sourceNamespaces:
+    {{- toYaml $proj.sourceNamespaces | nindent 4 }}
+  {{- end }}
+  {{- if $proj.orphanedResources }}
+  orphanedResources:
+    {{- toYaml $proj.orphanedResources | nindent 4 }}
+  {{- end }}
+{{- end }}
+{{- end -}}
+{{- end -}}

@@ -1,0 +1,25 @@
+apiVersion: v2
+name: argocd-gitops-platform
+description: Helm chart for declarative Argo CD GitOps platform orchestration (AppProject, ApplicationSet Matrix Generators for Helm multi-source and Kustomize, and workload governance).
+type: application
+version: 2.0.0
+appVersion: 3.6.3
+kubeVersion: '>=1.35.0-0 <1.38.0-0'
+home: https://fredychivalan.github.io/helm-charts
+keywords:
+  - argocd
+  - gitops
+  - applicationset
+  - application
+  - appproject
+  - helm
+  - kustomize
+maintainers:
+  - name: Fredy Chivalán
+    email: c3.fredy@gmail.com
+annotations:
+  artifacthub.io/license: Apache-2.0
+  artifacthub.io/maintainers: |-
+    - name: Fredy Chivalán
+      email: c3.fredy@gmail.com
+  artifacthub.io/prerelease: "false"

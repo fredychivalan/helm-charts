@@ -1,0 +1,104 @@
+global:
+  argoNamespace: argocd
+  defaultProject: platform-apps
+  allowDefaultProject: false
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+  revisionHistoryLimit: 3
+  applicationLabels:
+    app.kubernetes.io/part-of: platform-gitops
+  defaults:
+    helm:
+      repoURL: https://charts.example.com
+      targetRevision: 1.0.0
+      chart: workload-stateless
+      valueFiles:
+        - '{{ .path.path }}/values.yaml'
+    kustomize:
+      repoURL: https://git.example.com/platform/applications.git
+      targetRevision: main
+      commonLabels:
+        app.kubernetes.io/managed-by: argocd
+    syncPolicy:
+      automated:
+        prune: true
+        selfHeal: true
+        allowEmpty: false
+      syncOptions:
+        - CreateNamespace=true
+        - PruneLast=true
+      retry:
+        limit: 5
+        backoff:
+          duration: 5s
+          factor: 2
+          maxDuration: 3m
+appProjects:
+  platform-apps:
+    enabled: true
+    description: Proyecto aislado para cargas gestionadas por ApplicationSets
+    sourceRepos:
+      - https://charts.example.com
+      - https://git.example.com/platform/applications.git
+    destinations:
+      - server: https://kubernetes.default.svc
+        namespace: platform-*
+    clusterResourceWhitelist:
+      - group: ""
+        kind: Namespace
+    orphanedResources:
+      warn: true
+appsetsHelm:
+  example-helm-workloads:
+    enabled: true
+    applicationNameTemplate: '{{ .metadata.labels.environment }}-{{ .path.basename }}'
+    destination:
+      server: '{{ .server }}'
+      namespace: '{{ .metadata.labels.environment }}'
+    targetSourceOverride:
+      helm:
+        valueFiles:
+          - '{{ .path.path }}/{{ .metadata.labels.environment }}.yaml'
+    generators:
+      matrix:
+        clusters:
+          matchLabels:
+            cluster-tier: workload
+        git:
+          repoURL: https://git.example.com/platform/applications.git
+          targetRevision: main
+          files:
+            - apps/helm/*/helm-config.yaml
+appsetsKustomize:
+  example-kustomize-workloads:
+    enabled: true
+    applicationNameTemplate: '{{ .metadata.labels.environment }}-{{ .path.basename }}'
+    destination:
+      server: '{{ .server }}'
+      namespace: '{{ .metadata.labels.environment }}'
+    syncPolicy:
+      syncOptions:
+        - ServerSideApply=true
+    targetSourceOverride:
+      kustomize:
+        components:
+          - ../../components/hardening
+        patches:
+          - target:
+              group: apps
+              version: v1
+              kind: Deployment
+            patch: |
+              - op: replace
+                path: /spec/revisionHistoryLimit
+                value: 3
+    generators:
+      matrix:
+        clusters:
+          matchLabels:
+            cluster-tier: workload
+        git:
+          repoURL: https://git.example.com/platform/applications.git
+          targetRevision: main
+          directories:
+            - apps/kustomize/*/overlays/*

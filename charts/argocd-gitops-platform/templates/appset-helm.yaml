@@ -1,0 +1,115 @@
+{{- $root := . -}}
+{{- $global := .Values.global -}}
+{{- $globalDefaults := default dict $global.defaults -}}
+{{- $globalHelm := default dict $globalDefaults.helm -}}
+{{- if .Values.appsetsHelm -}}
+{{- range $appName := (keys .Values.appsetsHelm | sortAlpha) -}}
+{{- $appConfig := index $root.Values.appsetsHelm $appName -}}
+{{- if eq (default false $appConfig.enabled) true }}
+{{- $project := default $global.defaultProject $appConfig.project -}}
+{{- include "argocd-gitops-platform.assertProjectPolicy" (dict "global" $global "project" $project "context" (printf "appsetsHelm.%s" $appName)) -}}
+{{- $dest := default dict $appConfig.destination -}}
+{{- include "argocd-gitops-platform.assertDestination" (dict "dest" $dest "context" (printf "appsetsHelm.%s" $appName)) -}}
+{{- $override := default dict $appConfig.targetSourceOverride -}}
+{{- $repoURL := default $globalHelm.repoURL $override.repoURL -}}
+{{- $targetRevision := default $globalHelm.targetRevision $override.targetRevision -}}
+{{- $chart := default $globalHelm.chart $override.chart -}}
+{{- $git := $appConfig.generators.matrix.git -}}
+{{- $labels := mergeOverwrite (deepCopy (default dict $global.applicationLabels)) (deepCopy (default dict $appConfig.applicationLabels)) -}}
+{{- $annotations := mergeOverwrite (deepCopy (default dict $global.applicationAnnotations)) (deepCopy (default dict $appConfig.applicationAnnotations)) -}}
+{{- $mergedSync := include "argocd-gitops-platform.mergeSyncPolicy" (dict "global" $globalDefaults.syncPolicy "tenant" $appConfig.syncPolicy) -}}
+{{- $ignoreDiff := concat (default list $globalDefaults.ignoreDifferences) (default list $appConfig.ignoreDifferences) -}}
+{{- $globalValueFiles := default list $globalHelm.valueFiles -}}
+{{- $tenantValueFiles := list -}}
+{{- if and $override.helm $override.helm.valueFiles -}}
+  {{- $tenantValueFiles = $override.helm.valueFiles -}}
+{{- end -}}
+{{- $allValueFiles := concat $globalValueFiles $tenantValueFiles -}}
+---
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: {{ $appName | quote }}
+  namespace: {{ default "argocd" $global.argoNamespace | quote }}
+  labels:
+    {{- include "argocd-gitops-platform.labels" $root | nindent 4 }}
+spec:
+  goTemplate: true
+  goTemplateOptions:
+    - "missingkey=error"
+  generators:
+    - matrix:
+        generators:
+          - clusters:
+              selector:
+                {{- toYaml $appConfig.generators.matrix.clusters | nindent 16 }}
+          - git:
+              repoURL: {{ $git.repoURL | quote }}
+              revision: {{ $git.targetRevision | quote }}
+              {{- if hasKey $git "requeueAfterSeconds" }}
+              requeueAfterSeconds: {{ $git.requeueAfterSeconds }}
+              {{- end }}
+              {{- if $git.pathParamPrefix }}
+              pathParamPrefix: {{ $git.pathParamPrefix | quote }}
+              {{- end }}
+              {{- if $git.values }}
+              values:
+                {{- toYaml $git.values | nindent 16 }}
+              {{- end }}
+              files:
+                {{- range $file := $git.files }}
+                - path: {{ $file | quote }}
+                {{- end }}
+  template:
+    metadata:
+      name: {{ default "{{ .metadata.labels.environment }}-{{ .path.basename }}" $appConfig.applicationNameTemplate | quote }}
+      {{- if $global.finalizers }}
+      finalizers:
+        {{- toYaml $global.finalizers | nindent 8 }}
+      {{- end }}
+      labels:
+        environment: {{ "{{ .metadata.labels.environment }}" | quote }}
+        {{- if gt (len $labels) 0 }}
+        {{- toYaml $labels | nindent 8 }}
+        {{- end }}
+      {{- if gt (len $annotations) 0 }}
+      annotations:
+        {{- toYaml $annotations | nindent 8 }}
+      {{- end }}
+    spec:
+      project: {{ $project | quote }}
+      {{- if hasKey $global "revisionHistoryLimit" }}
+      revisionHistoryLimit: {{ $global.revisionHistoryLimit }}
+      {{- end }}
+      sources:
+        - repoURL: {{ $repoURL | quote }}
+          targetRevision: {{ $targetRevision | quote }}
+          chart: {{ $chart | quote }}
+          {{- if gt (len $allValueFiles) 0 }}
+          helm:
+            valueFiles:
+              {{- range $valFile := $allValueFiles }}
+              - {{ printf "$values/%s" $valFile | quote }}
+              {{- end }}
+          {{- end }}
+        - repoURL: {{ $git.repoURL | quote }}
+          targetRevision: {{ $git.targetRevision | quote }}
+          ref: "values"
+      destination:
+        {{- if $dest.name }}
+        name: {{ $dest.name | quote }}
+        {{- else }}
+        server: {{ default "{{ .server }}" $dest.server | quote }}
+        {{- end }}
+        namespace: {{ default "{{ .metadata.labels.environment }}" $dest.namespace | quote }}
+      {{- if $mergedSync }}
+      syncPolicy:
+        {{- $mergedSync | nindent 8 }}
+      {{- end }}
+      {{- if gt (len $ignoreDiff) 0 }}
+      ignoreDifferences:
+        {{- toYaml $ignoreDiff | nindent 8 }}
+      {{- end }}
+{{- end }}
+{{- end -}}
+{{- end -}}
